@@ -21,7 +21,7 @@
 #define SMMNODE_TYPE_FOODCHANGE   5
 #define SMMNODE_TYPE_FESTIVAL     6
 
-static char smmNodeName[MAX_NODETYPE][MAX_CHARNAME]={
+static char smmNodeName[MAX_NODETYPE][MAX_CHARNAME] = {
        "lecture",
        "restaurant",
        "laboratory",
@@ -54,6 +54,23 @@ int smmObj_genNode(char* name, int type, int credit, int energy)
 
 
 //member retrieving
+char* smmObj_getName(int node_nr)
+{
+      return(smm_name[node_nr]);
+}
+
+int smmObj_getType(int node_nr)
+{
+      return(smm_type[node_nr]);
+}
+int smmObj_getEnergy(int node_nr)
+{
+      return(smm_energy[node_nr]);
+}
+char* smmObj_getNodeName(int node_type)
+{
+      return(smmNodeName[node_type]);
+}
 
 
 #if 0
