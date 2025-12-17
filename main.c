@@ -96,7 +96,8 @@ int main(int argc, const char * argv[]) {
     while ( fscanf(fp, "%s %i %i %i", name, &type, &credit, &energy) == 4 ) //read a node parameter set
     {
         //store the parameter set
-        printf("%s %i %i %i\n", name, type, credit, energy);
+        //printf("%s %i %i %i\n", name, type, credit, energy);
+        board_nr = smmObj_genNode(name, type, credit, energy);
     }
     fclose(fp);
     printf("Total number of board nodes : %i\n", board_nr);
