@@ -55,6 +55,7 @@ int smmObj_getObjectType(void *ptr);
 char* smmObj_getTypeName(void *ptr);
 int smmObj_getObjectEnergy(void *ptr);
 int smmObj_getObjectCredit(void *ptr);
+int smmObj_getObjectGrade(void *ptr);
 
 //member retrieving
 

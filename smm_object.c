@@ -128,6 +128,11 @@ char* smmObj_getTypeName(void *ptr)
       smmObj_object_t* objPtr = (smmObj_object_t*)ptr;
       return(smmObj_nodeName[objPtr->type]);
 }
+int smmObj_getObjectGrade(void *ptr)
+{
+    smmObj_object_t* objPtr = (smmObj_object_t*)ptr;
+    return (objPtr->grade);
+}
 
 
 #if 0
