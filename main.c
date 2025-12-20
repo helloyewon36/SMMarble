@@ -118,7 +118,7 @@ void* findGrade(int player, char *lectureName) //find the grade from the player'
 }
 
 
-int isGraduated(void)
+int isGraduated(void) //someone is graduated or not
 {
     int i;
     for (i=0;i<smm_player_nr;i++)
@@ -227,14 +227,14 @@ void actionNode(int player)
     int grade;
     void *gradePtr;
     
-    printf(" --> player: %s  pos :%i,   type : %s,   credit : %i,   energy : %i\n", 
+    printf(" \n\n--> player: %s  pos :%i,   type : %s,   credit : %i,   energy : %i\n", 
               smm_players[player].name, smm_players[player].pos, smmObj_getTypeName(ptr), credit, energy );
     switch(type)
      {
          case SMMNODE_TYPE_LECTURE:
          if (findGrade(player, smmObj_getObjectName(ptr)) == NULL ) // do not take duplicate classes  
          {    char choice[10];
-              printf(" \n->Lecture %s starts! Are you going to join or drop? : ", smmObj_getObjectName(ptr));
+              printf(" \n->Lecture %s , credit (%i), energy (%i) starts! Are you going to join or drop? : ", smmObj_getObjectName(ptr), credit, energy);
               scanf("%9s", &choice);
               
               if (strcmp(choice, "join") == 0)  //choice - join or drop     
@@ -269,42 +269,52 @@ void actionNode(int player)
               
          case SMMNODE_TYPE_LABORATORY:
             {  
-               if (smm_players[player].flag_lab == 1)
+               int dice;                       
+               if (smm_players[player].flag_lab == 0) // target declare 
                {  
-                  printf("%s is in the laboratory.\n", smm_players[player].name);
+                  smm_players[player].lab_target = rand() % 6 + 1;
+                  smm_players[player].flag_lab = 1;
+                  printf("%s enters the laboratory.\n", smm_players[player].name);
                   printf(" Experiment target value: %d\n", smm_players[player].lab_target);
-                  int dice = rand() % 6 + 1;
-                  printf("Rolled dice: %d\n", dice);
-                    if (dice >= smm_players[player].lab_target)
-                      {
-                          printf("Experiment succeeded!\n");
-                          smm_players[player].flag_lab = 0; // experiment ends
-                          smm_players[player].credit += credit;
-                          smm_players[player].energy -= energy;
-                       }
-                    else
-                     {
-                           printf("Experiment failed. Try again next turn.\n");
-                      }
+                }
+               else // when player still in the laboratory - try again
+               {
+                  printf("%s is still in the laboratory.\n", smm_players[player].name );   
+                  printf("Experiment target value: %d\n", smm_players[player].lab_target);
+               }
+               
+               printf(" Press any key to roll a die for experiment: ");
+               getchar();
+               getchar();
+               
+               dice = rand() % 6 + 1;
+               printf(" Rolled dice: %d\n", dice);
+
+               if (dice == smm_players[player].lab_target) // when player got the same value  
+                 {
+                     printf(" Experiment succeeded! %s escapes the laboratory.\n",
+                     smm_players[player].name);
+  
+                     smm_players[player].flag_lab = 0;
+                     smm_players[player].lab_target = 0;
+
+                      smm_players[player].credit += credit;
+                      smm_players[player].energy -= energy;
                   }
               else
-               {     //new experiment starts
-                     int target = rand() % 6 + 1; //new random target
-                     smm_players[player].lab_target = target;
-                     smm_players[player].flag_lab = 1;
+                  {
+                     printf(" Experiment failed. %s remains in the laboratory.\n", smm_players[player].name);
+                  }
 
-                      printf("%s starts a new experiment. Target value: %d\n", smm_players[player].name, target);
-                }
-
-              }
               
                   break;
+           }
                   
                     
          case SMMNODE_TYPE_HOME:
               
               smm_players[player].energy += energy;
-              if (smm_players[player].credit >= GRADUATE_CREDIT)
+              if (smm_players[player].credit >= GRADUATE_CREDIT) //the condition of graduation
                 {
                         smm_players[player].flag_graduated = 1;
                         printf(" Total credit: %d\n", smm_players[player].credit);
@@ -326,13 +336,13 @@ void actionNode(int player)
               {int idx;
               void *foodPtr;
               
-              printf("%s  gets a food chance! press any key to pick a food card: ",smm_players[player].name);
+              printf("%s  gets a food chance! press any key to pick a food card: ",smm_players[player].name); //choosing food card
               getchar();
               
               idx= rand()%smm_food_nr;
               foodPtr = smmdb_getData(LISTNO_FOODCARD, idx);
               int foodEnergy = smmObj_getObjectEnergy(foodPtr);
-              printf(" Food card: %s\n", smmObj_getObjectName(foodPtr));
+              printf(" \n Food card: %s !! you got %i energy !!\n", smmObj_getObjectName(foodPtr), foodEnergy); //get food energy
               
               smm_players[player].energy += foodEnergy;
              
@@ -345,15 +355,15 @@ void actionNode(int player)
               { int idx;
               void* festPtr;
 
-               printf("%s participates to Snow Festival! press any key to pick a festival card: ",smm_players[player].name);
-               getchar();   // 키 입력 대기
+               printf("%s participates to Snow Festival! press any key to pick a festival card: ",smm_players[player].name);//choosing festival card
+               getchar();   
 
                idx = rand() % smm_festival_nr;
                festPtr = smmdb_getData(LISTNO_FESTCARD, idx);
 
                if (festPtr != NULL)
                    {
-                     printf("%s\n", smmObj_getObjectName(festPtr));
+                     printf("\n MISSION: %s\n", smmObj_getObjectName(festPtr)); // showing the mission
                    }
 
                 break;
@@ -442,7 +452,7 @@ int main(int argc, const char * argv[]) {
           printf("%s", name);
           ptr = smmObj_genObject(name, SMMNODE_OBJTYPE_FEST, 0,0,0,0);
           smmdb_addTail(LISTNO_FESTCARD, ptr);
-          smm_festival_nr = smmdb_len(LISTNO_FESTCARD);
+          smm_festival_nr = smmdb_len(LISTNO_FESTCARD); //length of festcard
           
         //store the parameter set
     }
@@ -508,14 +518,14 @@ int main(int argc, const char * argv[]) {
                  {
                             void* gradePtr = smmdb_getData(LISTNO_OFFSET_GRADE + turn, i);
                             char* lectureName = smmObj_getObjectName(gradePtr);
-                            int credit = smmObj_getObjectCredit(gradePtr);  // 각 강의 학점
-                            int grade = smmObj_getObjectGrade(gradePtr);    // 성적
-                            printf("Lecture: %s, Credit: %d, Grade: %d\n", lectureName, credit, grade);
+                            int credit = smmObj_getObjectCredit(gradePtr);  // credit of every lectures
+                            int grade = smmObj_getObjectGrade(gradePtr);    // grade of every lectures
+                            printf("Lecture: %s, Credit: %d, Grade: %d\n", lectureName, credit, grade); //print each 
                     }
 
             //entire grade avg.
             float avgGrade = calcAverageGrade(turn);
-            printf("Average Grade: %.2f\n", avgGrade);
+            printf("Average Grade: %.2f\n", avgGrade); // print avg grade
 
             printf("=== Game Over ===\n");
              break; // 게임 종료
